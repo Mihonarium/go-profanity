@@ -67,19 +67,48 @@ func IsStringDirty(message string) bool {
  	Output :
 		words (bool) boolean result
 **/
-func MaskProfanity(message string, maskWith string) string {
+func MaskProfanity(message string, maskWith string, keepCharactersAroundMask int) string {
 	result := message
-	for _, value := range strings.Fields(strings.ToLower(message)) {
+	for _, value := range strings.Fields(message) {
 		punctuationRegex := "[,:;]"
-		replacement := ""
-		cleanedValue := cleanPunctuations(value, punctuationRegex, replacement)
+		cleanedValue := cleanPunctuations(value, punctuationRegex, "")
 		if exists := wordExistsInDictionary(cleanedValue); exists {
 			replacement := ""
 			for i := 0; i < len(cleanedValue); i++ {
-				replacement = replacement + maskWith
+				if len(cleanedValue) > keepCharactersAroundMask * 2 && (i < keepCharactersAroundMask || len(cleanedValue) - i <= keepCharactersAroundMask) {
+					replacement += string(cleanedValue[i])
+				} else {
+					replacement += maskWith
+				}
 			}
 			result = strings.Replace(result, cleanedValue, replacement, -1)
 		}
+	}
+	return result
+}
+
+
+func MaskProfanityWithoutKeepingSpaceTypes(message string, maskWith string, keepCharactersAroundMask int) string {
+	result := ""
+	for w, value := range strings.Fields(message) {
+		if w != 0 {
+			result += " "
+		}
+		newWord := value
+		punctuationRegex := "[,:;]"
+		cleanedValue := cleanPunctuations(value, punctuationRegex, "")
+		if exists := wordExistsInDictionary(cleanedValue); exists {
+			replacement := ""
+			for i := 0; i < len(cleanedValue); i++ {
+				if len(cleanedValue) > keepCharactersAroundMask * 2 && (i < keepCharactersAroundMask || len(cleanedValue) - i <= keepCharactersAroundMask) {
+					replacement += string(cleanedValue[i])
+				} else {
+					replacement += maskWith
+				}
+			}
+			newWord = strings.Replace(newWord, cleanedValue, replacement, -1)
+		}
+		result += newWord
 	}
 	return result
 }
@@ -106,6 +135,6 @@ func cleanPunctuations(word string, punctuationRegex string, replacement string)
 		exists (boolean) boolean response
 **/
 func wordExistsInDictionary(word string) bool {
-	_, exists := profanityWords[word]
+	_, exists := profanityWords[strings.ToLower(word)]
 	return exists
 }
