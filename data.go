@@ -288,6 +288,7 @@ var profanityWords = map[string]int{
 	"muthafuckker":                          1,
 	"muther":                                1,
 	"mu therfucker":                         1,
+	"negro":                                 1,
 	"n1gga":                                 1,
 	"n1gger":                                1,
 	"nazi":                                  1,
